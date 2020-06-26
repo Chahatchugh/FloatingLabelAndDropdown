@@ -4,7 +4,6 @@ A <FloatingLabel> component for react-native. This is still very much a work in 
 
 Add it to your project
 Run npm install react-native-floating-label-and-dropdown --save
-var FloatingLabel = require('react-native-floating-labels');
 
 FloatingLabel is just like any TextInput. It supports the below mentioned events handlers:
 
