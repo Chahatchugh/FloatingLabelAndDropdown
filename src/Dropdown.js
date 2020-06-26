@@ -1,4 +1,4 @@
-import React, { PureComponent } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Keyboard,
     Modal,
@@ -6,6 +6,7 @@ import {
     Platform,
     Text,
     TextInput,
+    Picker,
     TouchableOpacity,
     View,
 } from 'react-native';
@@ -66,7 +67,13 @@ const Dropdown = (props) => {
     //     Icon: PropTypes.func,
     //     InputAccessoryView: PropTypes.func,
     // };
-
+    const [items, changeItems] = useState();
+    const [selectedItem, changeSelectedItem] = useState(new Map());
+    const [showPicker, setShowPicker] = useState(false);
+    const [animationType, setAnimationType] = useState(undefined);
+    const [orientation, changeOrientation] = useState('portrait');
+    const [doneDepressed, setDoneDepressed] = useState(false);
+    
     const defaultProps = {
         value: undefined,
         placeholder: {
@@ -92,6 +99,13 @@ const Dropdown = (props) => {
         touchableWrapperProps: {},
         Icon: null,
         InputAccessoryView: null,
+        onUpArrow = props.onUpArrow,
+        onDownArrow = props.onDownArrow,
+        onValueChange = props.onValueChange,
+        onOrientationChange = props.onOrientationChange,
+        setInputRef = props.setInputRef,
+        togglePicker = props.togglePicker,
+        renderInputAccessoryView = props.renderInputAccessoryView,
     };
 
     const handlePlaceholder = ({ placeholder }) => {
@@ -119,13 +133,13 @@ const Dropdown = (props) => {
 
     const getDerivedStateFromProps = (nextProps, prevState) => {
         // update items if items or placeholder prop changes
-        const items = RNPickerSelect.handlePlaceholder({
+        const items = Dropdown.handlePlaceholder({
             placeholder: nextProps.placeholder,
         }).concat(nextProps.items);
         const itemsChanged = !isEqual(prevState.items, items);
 
         // update selectedItem if value prop is defined and differs from currently selected item
-        const { selectedItem, idx } = RNPickerSelect.getSelectedItem({
+        const { selectedItem, idx } = Dropdown.getSelectedItem({
             items,
             key: nextProps.itemKey,
             value: nextProps.value,
@@ -146,6 +160,17 @@ const Dropdown = (props) => {
 
         return null;
     }
+
+    const items = Dropdown.handlePlaceholder({
+        placeholder: props.placeholder,
+    }).concat(props.items);
+
+    const { selectedItem } = Dropdown.getSelectedItem({
+        items,
+        key: props.itemKey,
+        value: props.value,
+    });
+
 
     // constructor(props) {
     //     super(props);
@@ -194,23 +219,17 @@ const Dropdown = (props) => {
         const { onValueChange } = props;
 
         onValueChange(value, index);
-
-        setState((prevState) => {
-            return {
-                selectedItem: prevState.items[index],
-            };
-        });
+        changeSelectedItem((prevState) => prevState.items[index]);
+        // setState((prevState) => {
+        //     return {
+        //         selectedItem: prevState.items[index],
+        //     };
+        // });
     }
 
-    const onOrientationChange = ({ nativeEvent }) => {
-        setState({
-            orientation: nativeEvent.orientation,
-        });
-    }
+    const onOrientationChange = ({ nativeEvent }) => { changeOrientation(nativeEvent.orientation) }
 
-    const setInputRef = (ref) => {
-        inputRef = ref;
-    }
+    const setInputRef = (ref) => { inputRef = ref; }
 
     const getPlaceholderStyle = () => {
         const { placeholder, style } = props;
@@ -254,20 +273,24 @@ const Dropdown = (props) => {
             modalProps && modalProps.animationType ? modalProps.animationType : 'slide';
 
         triggerOpenCloseCallbacks();
-
-        setState(
-            (prevState) => {
-                return {
-                    animationType: animate ? animationType : undefined,
-                    showPicker: !prevState.showPicker,
-                };
-            },
-            () => {
-                if (postToggleCallback) {
-                    postToggleCallback();
-                }
-            }
-        );
+        setAnimationType((prevState) =>  animate ? animationType : undefined );
+        setShowPicker((prevState) => !prevState.showPicker);
+        if (postToggleCallback) {
+            postToggleCallback();
+        };
+        // setState(
+        //     (prevState) => {
+        //         return {
+        //             animationType: animate ? animationType : undefined,
+        //             showPicker: !prevState.showPicker,
+        //         };
+        //     },
+        //     () => {
+        //         if (postToggleCallback) {
+        //             postToggleCallback();
+        //         }
+        //     }
+        // );
     }
 
     const renderPickerItems = () => {
@@ -345,10 +368,10 @@ const Dropdown = (props) => {
                         togglePicker(true, onDonePress);
                     }}
                     onPressIn={() => {
-                        setState({ doneDepressed: true });
+                        setDoneDepressed(true);
                     }}
                     onPressOut={() => {
-                        setState({ doneDepressed: false });
+                        setDoneDepressed(false);
                     }}
                     hitSlop={{ top: 4, right: 4, bottom: 4, left: 4 }}
                     {...touchableDoneProps}
@@ -534,19 +557,26 @@ const Dropdown = (props) => {
         );
     };
 
-    render() {
-        const { children, useNativeAndroidPickerStyle } = props;
+    // render() {
+    //     const { children, useNativeAndroidPickerStyle } = props;
 
-        if (Platform.OS === 'ios') {
-            return renderIOS();
-        }
+    //     if (Platform.OS === 'ios') {
+    //         return renderIOS();
+    //     }
 
-        if (children || !useNativeAndroidPickerStyle) {
-            return renderAndroidHeadless();
-        }
+    //     if (children || !useNativeAndroidPickerStyle) {
+    //         return renderAndroidHeadless();
+    //     }
 
-        return renderAndroidNativePickerStyle();
-    }
+    //     return renderAndroidNativePickerStyle();
+    // }
+    return (
+        <View style={elementStyles}>
+          <Picker
+            {...defaultProps}
+          />
+        </View>
+      );
 }
 
 // export { defaultStyles };
