@@ -5,6 +5,7 @@ import {
   Animated,
   Easing,
   View,
+  Text,
 } from 'react-native';
 import style from './style';
 
@@ -89,7 +90,7 @@ const FloatingLabel = (props) => {
     <Animated.Text
       style={[labelStyle, style.label, props.labelStyle]}
     >
-      {props.children}
+      {props.name}
     </Animated.Text>
   );
 
@@ -113,7 +114,7 @@ const FloatingLabel = (props) => {
     controlled: props.controlled,
     editable: props.editable,
     enablesReturnKeyAutomatically: props.enablesReturnKeyAutomatically,
-    //icon: props.icon,
+    //icon: props.icon,                          left and right icon
     keyboardType: props.keyboardType,
     multiline: props.multiline,
     maxLength: props.maxLength,                        // maxLength Functionality
@@ -136,7 +137,6 @@ const FloatingLabel = (props) => {
     testID: props.testID,
     accessibilityLabel: props.accessibilityLabel,
     value: text,
-    // withDropdown: props.withDropdown,
     underlineColorAndroid: props.underlineColorAndroid, // android TextInput will show the default bottom border
     onKeyPress: props.onKeyPress,
   };
